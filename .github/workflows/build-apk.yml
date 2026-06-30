@@ -5,15 +5,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      release_type:
-        description: 'Release type'
-        required: true
-        default: 'debug'
-        type: choice
-        options:
-          - debug
-          - release
 
 jobs:
   build:
@@ -30,68 +21,106 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 34
+          build-tools-version: 34.0.0
+
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
-
-      - name: Build Debug NoRuntime APK
-        run: ./gradlew assembleNoruntime
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease --no-daemon
 
-      - name: Get version info
+      - name: Get build version
         id: version
         run: |
-          echo "version=$(date +%Y.%m.%d)" >> $GITHUB_OUTPUT
-          echo "version_short=$(date +%d%m%Y)" >> $GITHUB_OUTPUT
+          echo "version=$(date +%Y.%m.%d_%H%M%S)" >> $GITHUB_OUTPUT
+          echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: app/build/outputs/apk/*/debug/
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: app/build/outputs/apk/*/release/
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: XL-Launcher Release - ${{ steps.version.outputs.version }}
+          tag_name: build-${{ steps.version.outputs.version }}
+          name: XL-LAUNCHER Build - ${{ steps.version.outputs.date }}
           body: |
-            ## Release Information
-            - Build Date: ${{ steps.version.outputs.version }}
-            - Build Type: APK
-            - Target API: 34
-            - Min SDK: 24
+            # XL-LAUNCHER APK Build Release
             
-            ## APKs Included
-            - **app-debug.apk** - Debug build with runtime
-            - **app-debug-noruntime.apk** - Debug build without runtime
-            - **app-release.apk** - Release build
+            **Build Date:** ${{ steps.version.outputs.date }}
+            **Build Time:** ${{ steps.version.outputs.version }}
             
-            ## Installation
-            1. Download the APK
-            2. Enable unknown sources in Android settings
-            3. Install the APK on your device
+            ## Build Details
+            - **Target API:** 34
+            - **Min SDK:** 24
+            - **Build Tools:** 34.0.0
+            - **Java Version:** 11
             
-            ### Features
-            - Multi-account management (Offline, Microsoft, GitHub)
-            - Smart Store for mods
-            - XAI Assistant
-            - Performance optimization
-            - Auto dependency download
+            ## What's Included
+            
+            ### Debug Builds
+            - ✅ `app-debug.apk` - Debug with runtime
+            - ✅ `app-noruntime-debug.apk` - Debug without runtime
+            
+            ### Release Builds
+            - ✅ `app-withruntime-release.apk` - Release with runtime
+            - ✅ `app-noruntime-release.apk` - Release without runtime
+            
+            ## Installation Instructions
+            
+            1. Download the APK file
+            2. Transfer to your Android device
+            3. Enable "Install from Unknown Sources" in Settings
+            4. Open the APK file and tap Install
+            5. Launch X-LAUNCHER from your app drawer
+            
+            ## Features
+            - 🎮 Minecraft Java Edition Launcher
+            - 👤 Multi-Account Management (Offline, Microsoft, GitHub)
+            - 🛍️ Smart Store for Mods
+            - 🤖 XAI Assistant
+            - ⚙️ Performance Optimization
+            - 📦 Auto Dependency Download
+            - 🔒 Security Scanner
+            
+            ## Troubleshooting
+            - If you get "App not installed", try the `noruntime` version
+            - Ensure you have at least 500MB free storage
+            - Check Android version is 6.0 (API 24) or higher
+            
+            ---
+            *Built automatically with GitHub Actions*
           files: |
-            app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/debug/debug/app-debug.apk
             app/build/outputs/apk/noruntime/debug/app-noruntime-debug.apk
             app/build/outputs/apk/withruntime/release/app-withruntime-release.apk
+            app/build/outputs/apk/noruntime/release/app-noruntime-release.apk
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: XL-Launcher-APKs
-          path: app/build/outputs/apk/
-          retention-days: 30
+      - name: Build Summary
+        run: |
+          echo "✅ Build Completed Successfully!"
+          echo ""
+          echo "📦 APK Outputs:"
+          find app/build/outputs/apk -name "*.apk" -type f
+          echo ""
+          echo "📍 Release created with tag: build-${{ steps.version.outputs.version }}"
+          echo "🔗 Check GitHub Releases page for downloads"
