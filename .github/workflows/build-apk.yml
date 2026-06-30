@@ -19,28 +19,38 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Accept Android Licenses
+      - name: Verify Gradle Wrapper
         run: |
-          mkdir -p $ANDROID_SDK_ROOT/licenses
-          echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > $ANDROID_SDK_ROOT/licenses/android-sdk-license
-          echo "d56f5187479451eabf01fb78af6dfcb131b33910" > $ANDROID_SDK_ROOT/licenses/android-sdk-preview-license
+          ls -la ./gradlew
+          file ./gradlew
+          head -5 ./gradlew
+
+      - name: Clean Gradle Cache
+        run: |
+          rm -rf ~/.gradle/wrapper
+          rm -rf .gradle
+
+      - name: Display Gradle Version
+        run: ./gradlew --version
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew clean assembleDebug -x lint --no-daemon -i
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease --stacktrace
+        run: ./gradlew assembleRelease -x lint --no-daemon -i
 
       - name: Get build version
         id: version
         run: |
           echo "version=$(date +%Y.%m.%d_%H%M%S)" >> $GITHUB_OUTPUT
           echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+
+      - name: List APK files
+        run: find app/build/outputs/apk -name "*.apk" -type f
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -53,46 +63,23 @@ jobs:
             **Build Date:** ${{ steps.version.outputs.date }}
             **Build Time:** ${{ steps.version.outputs.version }}
             
-            ## Build Details
-            - **Target API:** 34
-            - **Min SDK:** 24
-            - **Java Version:** 17
-            
-            ## What's Included
-            - ✅ `app-debug.apk` - Debug with runtime
-            - ✅ `app-withruntime-release.apk` - Release with runtime
-            
-            ## Installation Instructions
-            1. Download the APK file
-            2. Transfer to your Android device (API 24+)
-            3. Enable "Install from Unknown Sources" in Settings
-            4. Open the APK file and tap Install
-            5. Launch X-LAUNCHER from your app drawer
+            ## Installation
+            1. Download the APK
+            2. Enable "Unknown Sources" in Android settings
+            3. Install on your device (Android 6.0+)
             
             ## Features
-            - 🎮 Minecraft Java Edition Launcher
-            - 👤 Multi-Account Management
-            - 🛍️ Smart Store for Mods
+            - 🎮 Minecraft Java Launcher
+            - 👤 Multi-Account Support
+            - 🛍️ Smart Store
             - 🤖 XAI Assistant
-            - ⚙️ Performance Optimization
             
             ---
-            *Built automatically with GitHub Actions*
+            *Auto-built with GitHub Actions*
           files: |
-            app/build/outputs/apk/*/debug/*.apk
-            app/build/outputs/apk/*/release/*.apk
+            app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/release/app-release.apk
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Summary
-        if: success()
-        run: |
-          echo "✅ Build Completed Successfully!"
-          echo "📦 APK Files Generated:"
-          find app/build/outputs/apk -name "*.apk" -type f
-
-      - name: Build Failed
-        if: failure()
-        run: echo "❌ Build failed. Check logs above for details."
