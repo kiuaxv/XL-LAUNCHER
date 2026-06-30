@@ -1,74 +1,72 @@
 package com.xlauncher.minecraft.managers;
 
+import android.os.Build;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.os.Debug;
 
 public class PerformanceManager {
     private Context context;
     private ActivityManager activityManager;
-    private Runtime runtime;
 
     public PerformanceManager(Context context) {
         this.context = context;
         this.activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        this.runtime = Runtime.getRuntime();
     }
 
     public long getAvailableMemoryMB() {
-        ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
-        activityManager.getMemoryInfo(memoryInfo);
-        return memoryInfo.availMem / (1024 * 1024);
+        Runtime runtime = Runtime.getRuntime();
+        return (runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory()) / 1048576L;
     }
 
     public long getTotalMemoryMB() {
-        ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
-        activityManager.getMemoryInfo(memoryInfo);
-        return memoryInfo.totalMem / (1024 * 1024);
-    }
-
-    public long getUsedMemoryMB() {
-        return getTotalMemoryMB() - getAvailableMemoryMB();
-    }
-
-    public int getMemoryPercentage() {
-        long used = getUsedMemoryMB();
-        long total = getTotalMemoryMB();
-        return (int) ((used * 100) / total);
+        Runtime runtime = Runtime.getRuntime();
+        return runtime.maxMemory() / 1048576L;
     }
 
     public int getCoreCount() {
-        return runtime.availableProcessors();
+        return Runtime.getRuntime().availableProcessors();
     }
 
-    public String generateJavaArguments(int allocatedMemory) {
-        // Generate optimal Java arguments based on device specs
+    public OptimalJavaSettings generateOptimalJavaSettings() {
+        OptimalJavaSettings settings = new OptimalJavaSettings();
+        long totalMemory = getTotalMemoryMB();
+        
+        // Allocate 50-70% of available memory to game
+        if (totalMemory >= 8192) {
+            settings.minMemory = 4096;
+            settings.maxMemory = 6144;
+        } else if (totalMemory >= 4096) {
+            settings.minMemory = 2048;
+            settings.maxMemory = 3072;
+        } else {
+            settings.minMemory = 1024;
+            settings.maxMemory = 2048;
+        }
+
+        // Generate JVM arguments
+        settings.jvmArgs = generateJvmArguments(settings.maxMemory);
+        return settings;
+    }
+
+    private String generateJvmArguments(long maxMemory) {
         StringBuilder args = new StringBuilder();
-        args.append("-Xmx").append(allocatedMemory).append("M ");
-        args.append("-Xms").append(allocatedMemory / 2).append("M ");
+        args.append("-Xmx").append(maxMemory).append("M ");
+        args.append("-Xms512M ");
         args.append("-XX:+UseG1GC ");
         args.append("-XX:MaxGCPauseMillis=200 ");
         args.append("-XX:+UnlockExperimentalVMOptions ");
         args.append("-XX:G1NewCollectionPercentThreshold=30 ");
         args.append("-XX:G1MaxNewGenPercent=40 ");
+        args.append("-XX:InitiatingHeapOccupancyPercent=35 ");
+        args.append("-XX:+DisableExplicitGC ");
+        args.append("-XX:-UseAdaptiveSizePolicy ");
+        args.append("-XX:-OmitStackTraceInFastThrow");
         return args.toString();
     }
 
-    public void optimizePerformance() {
-        // Clear app cache
-        try {
-            context.getCacheDir().delete();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public boolean isDeviceCapableOfRunning(String minecraftVersion) {
-        // Check if device meets minimum requirements
-        long availableMemory = getAvailableMemoryMB();
-        int cores = getCoreCount();
-
-        // Minimum requirements for Minecraft Java
-        return availableMemory >= 512 && cores >= 2;
+    public static class OptimalJavaSettings {
+        public long minMemory;
+        public long maxMemory;
+        public String jvmArgs;
     }
 }

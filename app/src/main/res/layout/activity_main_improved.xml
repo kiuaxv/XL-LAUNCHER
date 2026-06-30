@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_dark"
+    android:orientation="vertical">
+
+    <!-- Status Bar Background -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/margin_small"
+        android:background="@color/background_darker" />
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_darker"
+        android:orientation="horizontal"
+        android:padding="@dimen/margin_medium">
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_launcher" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:paddingStart="@dimen/margin_medium"
+            android:text="@string/app_name"
+            android:textColor="@color/primary_gold"
+            android:textSize="@dimen/text_size_xlarge"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/menu_button"
+            android:layout_width="@dimen/icon_size_medium"
+            android:layout_height="@dimen/icon_size_medium"
+            android:contentDescription="Menu"
+            android:src="@drawable/ic_menu" />
+
+    </LinearLayout>
+
+    <!-- Main Content Container -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="@dimen/margin_medium">
+
+        <!-- Left Robot Section -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.3"
+            android:gravity="bottom|center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/xai_robot"
+                android:layout_width="100dp"
+                android:layout_height="120dp"
+                android:contentDescription="XAI Robot"
+                android:src="@drawable/ic_robot_xai" />
+
+        </LinearLayout>
+
+        <!-- Center X Logo -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:contentDescription="X Logo"
+                android:src="@drawable/ic_x_logo" />
+
+        </LinearLayout>
+
+        <!-- Right Card Section -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.3"
+            android:orientation="vertical">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/margin_small"
+                app:cardBackgroundColor="@color/primary_gold_light"
+                app:cardCornerRadius="@dimen/corner_radius_large"
+                app:cardElevation="@dimen/elevation_large">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:padding="@dimen/margin_medium">
+
+                    <!-- Profile Picture Section -->
+                    <LinearLayout
+                        android:id="@+id/profile_section"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/profile_picture"
+                            android:layout_width="@dimen/icon_size_large"
+                            android:layout_height="@dimen/icon_size_large"
+                            android:contentDescription="Profile"
+                            android:src="@drawable/ic_profile" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margin_small"
+                            android:text="@string/profile"
+                            android:textColor="@color/background_dark"
+                            android:textSize="@dimen/text_size_small" />
+
+                    </LinearLayout>
+
+                    <!-- Edit Profile Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/edit_profile_btn"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_small_height"
+                        android:layout_marginVertical="@dimen/margin_small"
+                        android:text="@string/edit_profile"
+                        android:textSize="@dimen/text_size_small"
+                        app:backgroundTint="@color/background_dark"
+                        app:cornerRadius="@dimen/corner_radius_small" />
+
+                    <!-- Version Card -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height"
+                        android:layout_marginVertical="@dimen/margin_small"
+                        app:cardBackgroundColor="@color/background_dark"
+                        app:cardCornerRadius="@dimen/corner_radius_small"
+                        app:cardElevation="@dimen/elevation_small">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/version"
+                                android:textColor="@color/primary_gold"
+                                android:textSize="@dimen/text_size_small" />
+
+                            <TextView
+                                android:id="@+id/version_number"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="26.2"
+                                android:textColor="@color/primary_gold"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Play Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/play_btn"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height"
+                        android:layout_marginVertical="@dimen/margin_small"
+                        android:text="@string/play"
+                        android:textSize="@dimen/text_size_large"
+                        app:backgroundTint="@color/background_dark"
+                        app:cornerRadius="@dimen/corner_radius_small" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</LinearLayout>
