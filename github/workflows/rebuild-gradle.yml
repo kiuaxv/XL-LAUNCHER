@@ -1,0 +1,57 @@
+name: Rebuild Gradle Wrapper From Scratch
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      
+      - name: Delete all gradle files
+        run: |
+          rm -rf gradlew gradlew.bat gradle/
+          ls -la
+      
+      - name: Install Gradle system-wide
+        run: sudo apt-get install -y gradle
+      
+      - name: Create gradle directory
+        run: mkdir -p gradle/wrapper
+      
+      - name: Initialize gradle wrapper
+        run: gradle wrapper --gradle-version 8.2.0
+      
+      - name: Verify files created
+        run: |
+          echo "=== Checking gradlew ==="
+          ls -lh gradlew
+          head -10 gradlew
+          echo "=== Checking gradle-wrapper.jar ==="
+          ls -lh gradle/wrapper/gradle-wrapper.jar
+      
+      - name: Make executable
+        run: chmod +x gradlew
+      
+      - name: Test it
+        run: ./gradlew --version
+      
+      - name: Push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add gradlew gradlew.bat gradle/
+          git commit -m "Rebuild: Complete Gradle wrapper regeneration"
+          git push origin main
+      
+      - name: Done
+        run: echo "✅ Gradle wrapper rebuilt successfully!"
