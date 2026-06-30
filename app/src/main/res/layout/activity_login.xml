@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_dark"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="16dp"
+        android:text="Login"
+        android:textColor="@color/primary_gold"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <!-- Offline Login -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/offline_login_btn"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginBottom="12dp"
+        android:text="Offline Account"
+        app:backgroundTint="@color/primary_gold"
+        app:cornerRadius="8dp" />
+
+    <!-- Microsoft Login -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/microsoft_login_btn"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginBottom="12dp"
+        android:text="Microsoft Account"
+        app:backgroundTint="@color/primary_gold"
+        app:cornerRadius="8dp" />
+
+    <!-- GitHub Login -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/github_login_btn"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:text="GitHub Account"
+        app:backgroundTint="@color/primary_gold"
+        app:cornerRadius="8dp" />
+
+</LinearLayout>
