@@ -1,0 +1,52 @@
+name: Build and Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: gradle
+      
+      - name: Grant execute permission to gradlew
+        run: chmod +x gradlew
+      
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+      
+      - name: Build Debug APK (with runtime)
+        run: ./gradlew assembleDebug
+      
+      - name: Build Debug APK (no runtime)
+        run: ./gradlew assembleNoruntime
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            app/build/outputs/apk/*/release/*.apk
+            app/build/outputs/apk/*/debug/*.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload APKs as Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: apk-release
+          path: app/build/outputs/apk/*/
+          retention-days: 30
