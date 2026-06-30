@@ -18,19 +18,18 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-          cache: gradle
       
       - name: Grant execute permission to gradlew
         run: chmod +x gradlew
       
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+      
       - name: Build Release APK
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease --stacktrace
       
       - name: Build Debug APK (with runtime)
-        run: ./gradlew assembleDebug
-      
-      - name: Build Debug APK (no runtime)
-        run: ./gradlew assembleNoruntime
+        run: ./gradlew assembleDebug --stacktrace
       
       - name: Create Release
         uses: softprops/action-gh-release@v2
