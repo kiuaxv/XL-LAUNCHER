@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="primary_gold">#f5e6b3</color>
+    <color name="primary_gold_dark">#d4c699</color>
+    <color name="primary_gold_light">#fffaeb</color>
+    <color name="background_dark">#1a1a1a</color>
+    <color name="background_darker">#0d0d0d</color>
+    <color name="text_primary">#f5e6b3</color>
+    <color name="text_secondary">#b39c7d</color>
+    <color name="accent_cyan">#00bcd4</color>
+    <color name="error">#ff6b6b</color>
+    <color name="success">#51cf66</color>
+    <color name="warning">#ffd43b</color>
+    <color name="separator">#333333</color>
+</resources>

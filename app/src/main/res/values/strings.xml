@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">X-Launcher</string>
+    <string name="version">Version</string>
+    <string name="play">Play</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="account">Account</string>
+    <string name="profile">Profile</string>
+    <string name="smart_store">Smart Store</string>
+    <string name="xai_assistant">XAI Assistant</string>
+    <string name="offline_account">Offline Account</string>
+    <string name="microsoft_account">Microsoft Account</string>
+    <string name="github_account">GitHub Account</string>
+    <string name="create_account">Create Account</string>
+    <string name="change_username">Change Username</string>
+    <string name="change_profile_picture">Change Profile Picture</string>
+    <string name="add_account">Add Account</string>
+    <string name="welcome">Welcome to X-Launcher</string>
+    <string name="click_to_begin">Click to begin</string>
+</resources>
