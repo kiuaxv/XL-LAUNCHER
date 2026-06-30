@@ -5,6 +5,15 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
 
 jobs:
   build:
@@ -12,44 +21,77 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK 11
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'temurin'
           cache: gradle
 
       - name: Make gradlew executable
-        run: chmod +x gradlew
+        run: chmod +x ./gradlew
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
+      - name: Build Debug NoRuntime APK
+        run: ./gradlew assembleNoruntime
+
       - name: Build Release APK
         run: ./gradlew assembleRelease
 
-      - name: Get version name
+      - name: Get version info
         id: version
-        run: echo "version=$(date +%Y.%m.%d)" >> $GITHUB_OUTPUT
+        run: |
+          echo "version=$(date +%Y.%m.%d)" >> $GITHUB_OUTPUT
+          echo "version_short=$(date +%d%m%Y)" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
           tag_name: v${{ steps.version.outputs.version }}
-          name: Release ${{ steps.version.outputs.version }}
+          name: XL-Launcher Release - ${{ steps.version.outputs.version }}
+          body: |
+            ## Release Information
+            - Build Date: ${{ steps.version.outputs.version }}
+            - Build Type: APK
+            - Target API: 34
+            - Min SDK: 24
+            
+            ## APKs Included
+            - **app-debug.apk** - Debug build with runtime
+            - **app-debug-noruntime.apk** - Debug build without runtime
+            - **app-release.apk** - Release build
+            
+            ## Installation
+            1. Download the APK
+            2. Enable unknown sources in Android settings
+            3. Install the APK on your device
+            
+            ### Features
+            - Multi-account management (Offline, Microsoft, GitHub)
+            - Smart Store for mods
+            - XAI Assistant
+            - Performance optimization
+            - Auto dependency download
           files: |
             app/build/outputs/apk/debug/app-debug.apk
-            app/build/outputs/apk/release/app-release.apk
-            app/build/outputs/apk/*/app-*-noruntime.apk
+            app/build/outputs/apk/noruntime/debug/app-noruntime-debug.apk
+            app/build/outputs/apk/withruntime/release/app-withruntime-release.apk
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload APK as Artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: APKs
-          path: app/build/outputs/apk/**/*.apk
+          name: XL-Launcher-APKs
+          path: app/build/outputs/apk/
+          retention-days: 30
