@@ -20,28 +20,36 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: '8.0'
 
-      - name: Verify Gradle Wrapper
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew || true
+
+      - name: Verify Gradle / Wrapper
         run: |
-          ls -la ./gradlew
-          file ./gradlew
-          head -5 ./gradlew
+          echo "-- java --"
+          java -version || true
+          echo "-- gradle (installed) --"
+          gradle --version || true
+          echo "-- gradle wrapper files --"
+          ls -la ./gradle/wrapper || true
+          ls -la ./gradlew || true
 
       - name: Clean Gradle Cache
         run: |
-          rm -rf ~/.gradle/wrapper
-          rm -rf .gradle
+          rm -rf .gradle || true
 
       - name: Display Gradle Version
-        run: ./gradlew --version
+        run: gradle --version
 
       - name: Build Debug APK
-        run: ./gradlew clean assembleDebug -x lint --no-daemon -i
+        run: gradle clean assembleDebug -x lint --no-daemon -i
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease -x lint --no-daemon -i
+        run: gradle assembleRelease -x lint --no-daemon -i
 
       - name: Get build version
         id: version
