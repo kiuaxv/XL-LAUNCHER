@@ -3,6 +3,13 @@ plugins {
     id 'kotlin-android'
 }
 
+repositories {
+    // Include local libs directory for JAR dependencies added to app/libs
+    flatDir {
+        dirs 'libs'
+    }
+}
+
 android {
     namespace 'com.xlauncher.minecraft'
     compileSdk 34
@@ -50,6 +57,9 @@ android {
 }
 
 dependencies {
+    // Include any local jars placed in app/libs
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
