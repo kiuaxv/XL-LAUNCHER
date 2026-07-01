@@ -38,7 +38,20 @@ jobs:
           ls -la ./gradle/wrapper || true
           ls -la ./gradlew || true
 
-      - name: Download open-source launcher and Minecraft client
+      - name: Download Zalith release assets
+        run: |
+          set -e
+          mkdir -p app/libs app/libs/minecraft
+          echo "Querying ZalithLauncher releases..."
+          ZALITH_URL=$(curl -s https://api.github.com/repos/ZalithLauncher/ZalithLauncher2/releases/latest | python3 -c "import sys,json; j=json.load(sys.stdin); assets=j.get('assets',[]); urls=[a['browser_download_url'] for a in assets if a.get('name','').endswith('.apk') or a.get('name','').endswith('.jar')]; print(urls[0] if urls else '')")
+          if [ -n "$ZALITH_URL" ]; then
+            echo "Found Zalith asset: $ZALITH_URL"
+            curl -L -o app/libs/zalith-launcher-latest.apk "$ZALITH_URL" || echo "Failed to download Zalith asset";
+          else
+            echo "No Zalith APK/JAR found in latest release; skipping Zalith download.";
+          fi
+
+      - name: Download open-source launcher (Pojav) and Minecraft client
         run: |
           set -e
           mkdir -p app/libs app/libs/minecraft
