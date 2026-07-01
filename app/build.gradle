@@ -3,13 +3,6 @@ plugins {
     id 'kotlin-android'
 }
 
-repositories {
-    // Include local libs directory for JAR dependencies added to app/libs
-    flatDir {
-        dirs 'libs'
-    }
-}
-
 android {
     namespace 'com.xlauncher.minecraft'
     compileSdk 34
