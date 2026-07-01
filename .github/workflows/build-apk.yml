@@ -38,6 +38,54 @@ jobs:
           ls -la ./gradle/wrapper || true
           ls -la ./gradlew || true
 
+      - name: Download open-source launcher and Minecraft client
+        run: |
+          set -e
+          mkdir -p app/libs app/libs/minecraft
+
+          echo "Attempting to download latest PojavLauncher APK (public release assets)..."
+          POJAV_URL=$(curl -s https://api.github.com/repos/PojavLauncherTeam/PojavLauncher/releases/latest | python3 -c "import sys,json; j=json.load(sys.stdin); assets=j.get('assets',[]); urls=[a['browser_download_url'] for a in assets if a.get('name','').endswith('.apk')]; print(urls[0] if urls else '')")
+          if [ -n "$POJAV_URL" ]; then
+            echo "Found Pojav URL: $POJAV_URL"
+            curl -L -o app/libs/pojavlauncher.apk "$POJAV_URL" || echo "Failed to download PojavLauncher APK";
+          else
+            echo "PojavLauncher APK not found via releases; skipping.";
+          fi
+
+          echo "Downloading Minecraft client using Mojang version manifest (latest release)..."
+          MANIFEST_JSON=$(curl -s https://launchermeta.mojang.com/mc/game/version_manifest.json)
+          MC_VERSION=$(python3 - <<'PY'
+import sys, json
+m=json.load(sys.stdin)
+print(m['latest']['release'])
+PY
+ <<<$MANIFEST_JSON)
+          echo "Minecraft release version: $MC_VERSION"
+          VERSION_URL=$(python3 - <<'PY'
+import sys, json
+m=json.load(sys.stdin)
+v='$MC_VERSION'
+for it in m['versions']:
+    if it['id']==v:
+        print(it['url'])
+        break
+PY
+ <<<$MANIFEST_JSON)
+          if [ -n "$VERSION_URL" ]; then
+            CLIENT_URL=$(curl -s "$VERSION_URL" | python3 -c "import sys,json; j=json.load(sys.stdin); print(j['downloads']['client']['url'])")
+            if [ -n "$CLIENT_URL" ]; then
+              echo "Downloading Minecraft client jar from $CLIENT_URL"
+              curl -L -o app/libs/minecraft-client-${MC_VERSION}.jar "$CLIENT_URL" || echo "Failed to download client jar";
+            else
+              echo "Client URL not found for version $MC_VERSION";
+            fi
+          else
+            echo "Version metadata URL not found for $MC_VERSION";
+          fi
+
+          echo "Listing app/libs contents:"
+          ls -la app/libs || true
+
       - name: Clean Gradle Cache
         run: |
           rm -rf .gradle || true
@@ -58,7 +106,7 @@ jobs:
           echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
 
       - name: List APK files
-        run: find app/build/outputs/apk -name "*.apk" -type f
+        run: find app/build/outputs/apk -name "*.apk" -type f || true
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
